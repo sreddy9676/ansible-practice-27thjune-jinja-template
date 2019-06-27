@@ -1,0 +1,29 @@
+- hosts: all
+  become: true
+  tasks:
+    - debug: 
+        msg: "{{apache_port}}"
+    - name: install apache 
+      yum: 
+        name: httpd 
+        state: present
+    - name: configure httpd port
+      template:
+        src: ./templates/httpd.conf.j2
+        dest: /etc/httpd/conf/httpd.conf 
+      notify:
+        - restart apache
+    - name: start and enable apache 
+      service: 
+        name: httpd 
+        state: started 
+        enabled: true
+    - name: deploy web application 
+      copy: 
+        src: index.html 
+        dest: /var/www/html/    
+  handlers:
+    - name: restart apache 
+      service: 
+        name: httpd 
+        state: restarted
